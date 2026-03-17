@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Setores - EstoquePro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="setores.css?v=1.0">
+    <link rel="stylesheet" href="menu.css?v=1.2">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">🍔 EstoquePro</div>
+        <div class="menu-item" onclick="window.location.href='dashboard.html'">🏠 Dashboard</div>
+        <div class="menu-item" onclick="window.location.href='setores.html'">🗂️ Setores</div>
+        <div class="menu-item" onclick="window.location.href='produtos.html'">📦 Produtos</div>
+        <div class="menu-item" onclick="window.location.href='compras.html'">🛒 Compras</div>
+        <div class="menu-item" onclick="window.location.href='estoque.html'">📊 Estoque</div>
+        <div class="menu-item" onclick="window.location.href='relatorios.html'">📑 Relatórios</div>
+        <div class="menu-item" onclick="window.location.href='assinatura.html'">⭐ Assinatura</div>
+        <div class="menu-item" onclick="logout()">🚪 Sair</div>
+    </div>
+    <div class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="main">
+        <div class="header-row">
+            <h1>Setores</h1>
+            <button class="btn-novo" onclick="abrirModal()">+ Novo Setor</button>
+        </div>
+        <div class="lista" id="listaSetores"></div>
+    </div>
+
+    <!-- Modal Novo/Editar Setor -->
+    <div id="setorModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="fecharModal()">&times;</span>
+            <h2 id="modalTitulo">Novo Setor</h2>
+            <input type="hidden" id="setorId">
+            <label>Nome do Setor *</label>
+            <input id="setorNome" placeholder="Ex: Cozinha, Bar, Padaria...">
+            <label>Descrição</label>
+            <textarea id="setorDescricao" placeholder="Descreva este setor (opcional)"></textarea>
+            <button onclick="salvarSetor()">Salvar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getEffectiveUid } from './menu.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCkwsmbR683PMT1XoOyEykqJmLCcieQwwU",
+            authDomain: "controle-de-estoque-fac87.firebaseapp.com",
+            projectId: "controle-de-estoque-fac87",
+            storageBucket: "controle-de-estoque-fac87.firebasestorage.app",
+            messagingSenderId: "931385340836",
+            appId: "1:931385340836:web:ed3cb1d560127b739b8731"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let effectiveUid = null;
+
+        async function initializePage() {
+            try {
+                effectiveUid = await getEffectiveUid();
+                carregarSetores();
+            } catch (error) {
+                console.error("Erro ao inicializar setores:", error);
+            }
+        }
+        initializePage();
+
+        async function carregarSetores() {
+            if (!effectiveUid) return;
+            const q = query(collection(db, "setores"), where("restaurante", "==", effectiveUid));
+            const snap = await getDocs(q);
+            const lista = document.getElementById("listaSetores");
+            if (snap.empty) {
+                lista.innerHTML = '<p class="vazio">Nenhum setor cadastrado. Clique em "+ Novo Setor" para começar.</p>';
+                return;
+            }
+            let html = "";
+            snap.forEach((d) => {
+                const s = d.data();
+                const descricao = s.descricao ? `<span class="descricao">${s.descricao}</span>` : '';
+                html += `
+                <div class="item">
+                    <div class="item-info">
+                        <b>${s.nome}</b>
+                        ${descricao}
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-edit" onclick="abrirModalEdicao('${d.id}', '${s.nome.replace(/'/g,"\\'")}', '${(s.descricao||'').replace(/'/g,"\\'")}')">Editar</button>
+                        <button class="btn-delete" onclick="deletarSetor('${d.id}')">Excluir</button>
+                    </div>
+                </div>`;
+            });
+            lista.innerHTML = html;
+        }
+
+        window.abrirModal = function() {
+            document.getElementById('setorId').value = '';
+            document.getElementById('setorNome').value = '';
+            document.getElementById('setorDescricao').value = '';
+            document.getElementById('modalTitulo').textContent = 'Novo Setor';
+            document.getElementById('setorModal').style.display = 'flex';
+        }
+
+        window.abrirModalEdicao = function(id, nome, descricao) {
+            document.getElementById('setorId').value = id;
+            document.getElementById('setorNome').value = nome;
+            document.getElementById('setorDescricao').value = descricao;
+            document.getElementById('modalTitulo').textContent = 'Editar Setor';
+            document.getElementById('setorModal').style.display = 'flex';
+        }
+
+        window.fecharModal = function() {
+            document.getElementById('setorModal').style.display = 'none';
+        }
+
+        window.salvarSetor = async function() {
+            if (!effectiveUid) return;
+            const id = document.getElementById('setorId').value;
+            const nome = document.getElementById('setorNome').value.trim();
+            const descricao = document.getElementById('setorDescricao').value.trim();
+
+            if (!nome) {
+                alert("O nome do setor é obrigatório.");
+                return;
+            }
+
+            if (id) {
+                await updateDoc(doc(db, "setores", id), { nome, descricao });
+            } else {
+                await addDoc(collection(db, "setores"), {
+                    nome,
+                    descricao,
+                    restaurante: effectiveUid
+                });
+            }
+
+            fecharModal();
+            carregarSetores();
+        }
+
+        window.deletarSetor = async function(id) {
+            if (confirm("Excluir este setor? Os produtos vinculados a ele não serão excluídos.")) {
+                await deleteDoc(doc(db, "setores", id));
+                carregarSetores();
+            }
+        }
+
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('setorModal');
+            if (e.target === modal) fecharModal();
+        });
+    </script>
+    <script src="menu.js" type="module"></script>
+</body>
+</html>
