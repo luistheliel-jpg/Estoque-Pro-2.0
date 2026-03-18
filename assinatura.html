@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assinatura - EstoquePro</title>
+    <link rel="stylesheet" href="menu.css?v=1.3">
+    <link rel="stylesheet" href="assinatura.css?v=1.3">
+</head>
+<body>
+
+    <!-- Menu Lateral -->
+    <div class="sidebar">
+        <div class="logo">🍔 EstoquePro</div>
+        <div class="menu-item" onclick="window.location.href='dashboard.html'">🏠 Dashboard</div>
+        <div class="menu-item" onclick="window.location.href='setores.html'">🗂️ Setores</div>
+        <div class="menu-item" onclick="window.location.href='produtos.html'">📦 Produtos</div>
+        <div class="menu-item" onclick="window.location.href='compras.html'">🛒 Compras</div>
+        <div class="menu-item" onclick="window.location.href='estoque.html'">📊 Estoque</div>
+        <div class="menu-item" onclick="window.location.href='relatorios.html'">📑 Relatórios</div>
+        <div class="menu-item" onclick="window.location.href='assinatura.html'">⭐ Assinatura</div>
+        <div class="menu-item" onclick="logout()">🚪 Sair</div>
+    </div>
+    <div class="hamburger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main">
+        <div id="subscription-container">
+            <!-- O conteúdo será carregado aqui pelo Javascript -->
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assinatura.js" type="module"></script>
+    <script src="menu.js?v=1.3" type="module"></script>
+
+</body>
+</html>

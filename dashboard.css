@@ -1,0 +1,48 @@
+h1{
+margin-bottom:30px;
+}
+
+/* CARDS */
+
+.cards{
+display:flex;
+gap:25px;
+flex-wrap:wrap;
+}
+
+.card{
+
+width:220px;
+padding:30px;
+
+border-radius:18px;
+
+background:rgba(255,255,255,0.05);
+
+cursor:pointer;
+
+transition:0.3s;
+
+box-shadow:0 0 10px rgba(255,140,0,0.2);
+
+}
+
+.card:hover{
+
+transform:scale(1.07);
+
+box-shadow:0 0 20px #ff8c00;
+
+}
+
+.card h2{
+margin:0;
+font-size:22px;
+color:#ff8c00;
+}
+
+.card p{
+margin-top:10px;
+font-size:14px;
+opacity:0.8;
+}
